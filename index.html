@@ -143,6 +143,12 @@
       <div class="deeper" hidden>
         <p>The 2023 open source (<b>twitter/the-algorithm</b>) described three stages: candidate sourcing (~1,500 posts), ranking with a <b>Light Ranker</b> then a <b>Heavy Ranker</b> neural net, and heuristics &amp; filters. The 2026 repo (<b>xai-org/x-algorithm</b>) keeps Home Mixer as the orchestrator but replaces the hand-built machinery: in xAI's words, they <i>“eliminated every single hand-engineered feature and most heuristics from the system.”</i> Four components do the work now: <b>Home Mixer</b> (orchestration, Rust), <b>Thunder</b> (in-memory in-network post store, Rust), <b>Phoenix</b> (the Grok-based transformer that scores, JAX/Python with a Rust serving layer), and the <b>Candidate Pipeline</b> framework (Rust) everything is composed from.</p>
       </div>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">Your For You feed doesn't exist until you open the app — it's assembled from scratch on every single open, and no two opens ever build the same one.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like a made-to-order kitchen — nothing is plated before you sit down. The Home Mixer is the head chef, running your order through every station — fetch, filter, score, plate — in under a second.</p>
+        <p class="tk-myth"><b>Most people think</b> the feed is a fixed queue that slowly updates over the day — <b>actually</b>, every open fires one brand-new request that rebuilds the entire timeline from zero.</p>
+      </aside>
     </div>
   </article>
 
@@ -219,6 +225,12 @@
       <div class="deeper" hidden>
         <p><b>Thunder</b> holds recent posts in memory as they're published and returns those from accounts you follow (config allows up to ~1,200). <b>Phoenix retrieval</b> is the two-tower model: it embeds the viewer and each post as vectors and returns the nearest posts (up to ~1,000) — pure out-of-network discovery. <b>SimClusters</b> groups accounts and posts by who engages with what and mines the clusters for more. Candidates are then <b>hydrated</b> — text, media, author details, labels, engagement counts — and <b>pre-scoring filters</b> strip out duplicates across sources, posts older than 48 hours, your own posts, blocked/muted accounts and keywords, already-seen posts, and subscriber-only posts you can't access.</p>
       </div>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">The famous ranking model never sees 99.9997% of posts — retrieval throws them away first. Retrieval, not ranking, is where your feed is really decided.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like a librarian who won't let you into the stacks — from 500 million books a day, she hands you about 1,500 she thinks you'll like, and you only ever get to choose from those.</p>
+        <p class="tk-myth"><b>Most people think</b> the algorithm scores everything and shows the best — <b>actually</b>, it can only rank the ~1,500 candidates retrieval bothered to fetch. A brilliant post that never becomes a candidate can never surface, no matter how good it is.</p>
+      </aside>
     </div>
   </article>
 
@@ -306,6 +318,12 @@
       <div class="deeper" hidden>
         <p>Three scorer stages run in order: <b>PhoenixScorer</b> emits a probability per action; <b>RankingScorer</b> takes the weighted sum, then applies <b>author diversity</b> (each post after an author's first is multiplied by a decaying factor, down to a floor), an <b>out-of-network discount</b> (a factor below 1 for accounts you don't follow), and a <b>new-author boost</b> (under ~1,000 impressions, lifted toward slots ~15–16). <b>VMRanker</b> then calls a separate service that reorders with a determinantal point process over post embeddings — trading a little score for less similarity between neighbors, so your feed isn't five versions of the same post. Then <b>TopKScoreSelector</b> keeps the top K. The single most misunderstood line in the repo: weights scale <i>your predicted probability</i> of each action — driven substantially by your own behavior — not raw engagement counts. A report's weight being 468× a like's does <i>not</i> mean one report cancels 468 likes.</p>
       </div>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">Your feed is a mirror, not a leaderboard — every weight multiplies a prediction of <i>you</i>, so no two people on Earth see the same X.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like a talent show where each judge's paddle has a different point value — one "replied!" paddle outscores ten "liked it!" paddles, and a single "reported" paddle can sink the whole act.</p>
+        <p class="tk-myth"><b>Most people think</b> a report (−234) cancels 468 likes because the weight is 468× bigger — <b>actually</b>, weights multiply your <i>predicted probability</i> of each action, and you're roughly a thousand times less likely to report than to like, so the arithmetic doesn't work like that.</p>
+      </aside>
     </div>
   </article>
 
@@ -372,6 +390,12 @@
       <div class="deeper" hidden>
         <p>Labels are produced continuously, <i>off</i> the request path: classifiers on text and media (grox, media models), account models like <b>agatha</b> (blocks and reports relative to favorites) and <b>bdsm</b> (inauthentic behavior over time), <b>user-cred-v2</b> (PageRank over the follow and engagement graph), and rule engines (<b>scarecrow</b> embedding <b>botmaker</b>). On the request path, the visibility rules read those labels plus your own blocks, mutes, follows, and settings. A post dropped post-selection takes its thread, quote, or repost ancestors down with it. And you can audit some of this yourself: the <b>Under the Hood</b> page in Settings lets you download a JSON of the labels applied to your account and posts.</p>
       </div>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">Most posts you never see weren't outscored — they were disqualified before the contest began: too old, already seen, a duplicate, or your own.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like a club door policy with three stamps — come on in, wait behind the rope, or not tonight. And the bouncer checks your personal list first: your blocks and mutes are on the clipboard.</p>
+        <p class="tk-myth"><b>Most people think</b> one ranking brain decides everything — <b>actually</b>, ranking and visibility are separate systems. A post can win the ranking and still get dropped at the door — or be allowed for a follower but dropped as a stranger's recommendation.</p>
+      </aside>
     </div>
   </article>
 
@@ -407,6 +431,12 @@
         <li><b>Freshness matters:</b> posts older than 48 hours are filtered before scoring even starts.</li>
         <li><b>New voices get a shot:</b> authors under ~1,000 impressions are boosted toward the middle of the feed, not buried.</li>
       </ul>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">In X's economy, one reply buys what ten likes buy — conversation isn't just encouraged, it's the currency.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like a recipe where the rarest spices get the biggest pinches — reports, mutes, and blocks almost never happen, so each one is weighted enormously just to register at all.</p>
+        <p class="tk-myth"><b>Most people think</b> likes are the currency of the feed — <b>actually</b>, the like (+0.5) is nearly the cheapest signal on the board. Replies, follows, shares, and the negative signals move your feed orders of magnitude more.</p>
+      </aside>
     </div>
   </article>
 
@@ -429,6 +459,12 @@
       </div>
       <p class="plain">Weights ship roughly <b>every 4 weeks</b>, and the repo's config defaults may not exactly match production. If you're quoting a number, re-check the source first:</p>
       <p class="repo-link"><a href="https://github.com/xai-org/x-algorithm">https://github.com/xai-org/x-algorithm</a></p>
+      <aside class="takeaway">
+        <p class="tk-tag">Takeaway</p>
+        <p class="tk-line">The strangest thing about the X algorithm: you can read it. Most of this page comes from code X published itself — not leaks, not guesses.</p>
+        <p class="tk-analogy"><b>Analogy:</b> like learning a magic trick from the magician's own notebook — except the notebook gets rewritten about every month, so always check the date before quoting a number.</p>
+        <p class="tk-myth"><b>Most people think</b> the algorithm is a total black box — <b>actually</b>, the pipeline code and even the Phoenix model are open source under Apache 2.0. What's private is your data — and whether production runs exactly this config.</p>
+      </aside>
     </div>
   </article>
 
