@@ -313,7 +313,7 @@ var wChart=document.getElementById("w-chart");
     var t=Math.sqrt(Math.abs(x.w)/maxAbs)*50;
     var left=x.w>=0?50:50-t, width=Math.max(t,1.2);
     var cls=x.w>=0?"pos":"neg";
-    return '<div class="bar-row"><span class="tok">'+esc(x.label)+
+    return '<div class="bar-row wrow"><span class="tok" title="'+esc(x.label)+' · '+tname[x.tier]+'">'+esc(x.label)+
       '<span class="tbadge '+x.tier+'">'+tname[x.tier]+'</span></span>'+
       '<span class="bar-track"><span class="bar-fill '+cls+'" style="left:'+left.toFixed(1)+'%;width:'+width.toFixed(1)+'%"></span></span>'+
       '<span class="bar-pct">'+(x.w>=0?"+":"")+x.w+"</span></div>";
